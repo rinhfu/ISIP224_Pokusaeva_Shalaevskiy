@@ -8,12 +8,17 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
 {
     internal class Program
     {
+        static List<KeyValuePair<string, decimal>> expenses = new List<KeyValuePair<string, decimal>>();
 
         static void Main(string[] args)
         {
-
             int operationCount = GetOperationCount();
 
+            InputExpenses(operationCount);
+
+            Console.WriteLine("\nНажмите любую клавишу для продолжения...");
+            Console.ReadKey();
+            Console.Clear();
         }
         static int GetOperationCount()
         {
@@ -33,6 +38,46 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
                 }
             }
         }
+
+        static void InputExpenses(int count)
+        {
+            Console.Clear();
+            Console.WriteLine("Введите траты в формате: Название; Сумма");
+            Console.WriteLine("Пример: Влажные салфетки \"Лента\"; 235\n");
+
+            for (int i = 0; i < count; i++)
+            {
+                while (true)
+                {
+                    Console.Write($"Операция {i + 1}: ");
+                    string input = Console.ReadLine();
+
+                    string[] parts = input.Split(';');
+
+                    if (parts.Length == 2)
+                    {
+                        string name = parts[0].Trim();
+                        string amountStr = parts[1].Trim();
+
+                        if (decimal.TryParse(amountStr, out decimal amount) && amount >= 0)
+                        {
+                            expenses.Add(new KeyValuePair<string, decimal>(name, amount));
+                            break;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Ошибка! Сумма должна быть числом (рубли). Попробуйте снова.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Ошибка! Используйте формат: Название; Сумма");
+                    }
+                }
+            }
+
+            Console.Clear();
+            Console.WriteLine("Все операции успешно записаны!\n");
+        }
     }
-    
 }
