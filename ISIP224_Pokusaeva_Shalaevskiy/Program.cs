@@ -79,5 +79,31 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
             Console.Clear();
             Console.WriteLine("Все операции успешно записаны!\n");
         }
+        static void ShowMenu()
+        {
+            Console.WriteLine("МЕНЮ ОПЕРАЦИЙ");
+            Console.WriteLine("1. Вывод данных");
+            Console.WriteLine("2. Статистика (среднее, максимальное, минимальное, сумма)");
+            Console.WriteLine("3. Сортировка по цене");
+            Console.WriteLine("4. Конвертация валюты");
+            Console.WriteLine("5. Поиск по названию");
+            Console.WriteLine("0. Выход");
+            Console.Write("Ваш выбор:");
+        }
+        static void DisplayExpenses()
+        {
+            Console.Clear();
+            Console.WriteLine("Список трат:");
+            if (expenses.Count == 0)
+            {
+                Console.WriteLine("Список пуст.");
+                return;
+            }
+            Console.WriteLine($"{"№",-4} {"Название",-30} {"Сумма(руб.)",10}");
+            for (int i = 0; i < expenses.Count; i++)
+            {
+                Console.WriteLine($"{i+1,-4} {expenses[i].Key,-30} {expenses[i].Value,10:F2}");
+            }
+        }
     }
 }
