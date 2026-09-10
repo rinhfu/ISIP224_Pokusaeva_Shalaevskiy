@@ -27,12 +27,16 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
                 case "2":
                     ShowStatistics();
                     break;
+                case "3":
+                    BubbleSort();
+                    break;
             }
 
             Console.WriteLine("\nНажмите любую клавишу для продолжения...");
             Console.ReadKey();
             Console.Clear();
         }
+
         static int GetOperationCount()
         {
             int count;
@@ -92,6 +96,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
             Console.Clear();
             Console.WriteLine("Все операции успешно записаны!\n");
         }
+
         static void ShowMenu()
         {
             Console.WriteLine("МЕНЮ ОПЕРАЦИЙ");
@@ -103,6 +108,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
             Console.WriteLine("0. Выход");
             Console.Write("Ваш выбор:");
         }
+
         static void DisplayExpenses()
         {
             Console.Clear();
@@ -118,10 +124,11 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
                 Console.WriteLine($"{i+1,-4} {expenses[i].Key,-30} {expenses[i].Value,10:F2}");
             }
         }
+
         static void ShowStatistics()
         {
             Console.Clear();
-            Console.WriteLine("СТАТИСТИКА");
+            Console.WriteLine("Статистика:");
 
             var values = expenses.Select(e => e.Value).ToList();
             decimal sum = values.Sum();
@@ -134,7 +141,28 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
             Console.WriteLine($"Среднее значение: {average:F2} руб.");
             Console.WriteLine($"Максимальная трата: {max:F2}  руб.");
             Console.WriteLine($"Минимальная трата: {min:F2}  руб.");
+        }
 
+        static void BubbleSort()
+        {
+            Console.Clear();
+            Console.WriteLine("Сортировка по цене:");
+
+            for (int i = 0; i < expenses.Count - 1; i++)
+            {
+                for (int j = 0; j < expenses.Count - 1 - i; j++)
+                {
+                    if (expenses[j].Value > expenses[j + 1].Value)
+                    {
+                        var temp = expenses[j];
+                        expenses[j] = expenses[j + 1];
+                        expenses[j + 1] = temp;
+                    }
+                }
+            }
+
+            Console.WriteLine("Список отсортирован по возрастанию цены:");
+            DisplayExpenses();
         }
     }
 }
