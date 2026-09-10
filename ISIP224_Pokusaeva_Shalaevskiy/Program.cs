@@ -16,6 +16,19 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
 
             InputExpenses(operationCount);
 
+            ShowMenu();
+
+            string choise = Console.ReadLine();
+            switch (choise)
+            {
+                case "1":
+                    DisplayExpenses();
+                    break;
+                case "2":
+                    ShowStatistics();
+                    break;
+            }
+
             Console.WriteLine("\nНажмите любую клавишу для продолжения...");
             Console.ReadKey();
             Console.Clear();
@@ -104,6 +117,24 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
             {
                 Console.WriteLine($"{i+1,-4} {expenses[i].Key,-30} {expenses[i].Value,10:F2}");
             }
+        }
+        static void ShowStatistics()
+        {
+            Console.Clear();
+            Console.WriteLine("СТАТИСТИКА");
+
+            var values = expenses.Select(e => e.Value).ToList();
+            decimal sum = values.Sum();
+            decimal average = sum / values.Count;
+            decimal max = values.Max();
+            decimal min = values.Min();
+
+            Console.WriteLine($"Всего операций: {values.Count}");
+            Console.WriteLine($"Общая сумма: {sum:F2} руб.");
+            Console.WriteLine($"Среднее значение: {average:F2} руб.");
+            Console.WriteLine($"Максимальная трата: {max:F2}  руб.");
+            Console.WriteLine($"Минимальная трата: {min:F2}  руб.");
+
         }
     }
 }
