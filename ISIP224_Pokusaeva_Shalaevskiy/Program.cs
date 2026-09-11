@@ -16,25 +16,36 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
 
             InputExpenses(operationCount);
 
-            ShowMenu();
-
-            string choise = Console.ReadLine();
-            switch (choise)
+            bool exit = false;
+            while (!exit)
             {
-                case "1":
-                    DisplayExpenses();
-                    break;
-                case "2":
-                    ShowStatistics();
-                    break;
-                case "3":
-                    BubbleSort();
-                    break;
-            }
+                ShowMenu();
 
-            Console.WriteLine("\nНажмите любую клавишу для продолжения...");
-            Console.ReadKey();
-            Console.Clear();
+                string choise = Console.ReadLine();
+                switch (choise)
+                {
+                    case "1":
+                        DisplayExpenses();
+                        break;
+                    case "2":
+                        ShowStatistics();
+                        break;
+                    case "3":
+                        BubbleSort();
+                        break;
+                    case "4":
+                        CurencyConversion();
+                        break;
+
+                }
+
+                if (!exit)
+                {
+                    Console.WriteLine("\nНажмите любую клавишу для продолжения...");
+                    Console.ReadKey();
+                    Console.Clear();
+                }
+            }
         }
 
         static int GetOperationCount()
@@ -83,7 +94,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
                         }
                         else
                         {
-                            Console.WriteLine("Ошибка! Сумма должна быть числом (рубли). Попробуйте снова.");
+                            Console.WriteLine("Ошибка! Сумма должна быть числом (Руб.). Попробуйте снова.");
                         }
                     }
                     else
@@ -118,7 +129,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
                 Console.WriteLine("Список пуст.");
                 return;
             }
-            Console.WriteLine($"{"№",-4} {"Название",-30} {"Сумма(руб.)",10}");
+            Console.WriteLine($"{"№",-4} {"Название",-30} {"Сумма(Руб.)",10}");
             for (int i = 0; i < expenses.Count; i++)
             {
                 Console.WriteLine($"{i+1,-4} {expenses[i].Key,-30} {expenses[i].Value,10:F2}");
@@ -138,9 +149,9 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
 
             Console.WriteLine($"Всего операций: {values.Count}");
             Console.WriteLine($"Общая сумма: {sum:F2} руб.");
-            Console.WriteLine($"Среднее значение: {average:F2} руб.");
-            Console.WriteLine($"Максимальная трата: {max:F2}  руб.");
-            Console.WriteLine($"Минимальная трата: {min:F2}  руб.");
+            Console.WriteLine($"Среднее значение: {average:F2} Руб.");
+            Console.WriteLine($"Максимальная трата: {max:F2}  Руб.");
+            Console.WriteLine($"Минимальная трата: {min:F2}  Руб.");
         }
 
         static void BubbleSort()
@@ -163,6 +174,72 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
 
             Console.WriteLine("Список отсортирован по возрастанию цены:");
             DisplayExpenses();
+        }
+
+        static void CurencyConversion()
+        {
+            Console.Clear();
+            Console.WriteLine("Конвертация валюты:");
+
+            Console.WriteLine("Выберите валюту или введите свой курс:");
+            Console.WriteLine("1. USD (Доллар США) - курс: ~84.35 Руб.");
+            Console.WriteLine("2. EUR (Евро) - курс: ~98.29 Руб.");
+            Console.WriteLine("3. CNY (Юань) - курс: ~12.56 Руб.");
+            Console.WriteLine("4. Ввести свой курс");
+            Console.Write("Ваш выбор: ");
+
+            string choice = Console.ReadLine();
+            decimal rate = 0;
+            string currencyName = "";
+
+            switch (choice)
+            {
+                case "1":
+                    rate = 84.35m;
+                    currencyName = "USD";
+                    break;
+                case "2":
+                    rate = 98.29m;
+                    currencyName = "EUR";
+                    break;
+                case "3":
+                    rate = 12.56m;
+                    currencyName = "CNY";
+                    break;
+                case "4":
+                    Console.Write("Введите курс (1 валюта = X рублей): ");
+                    if (!decimal.TryParse(Console.ReadLine(), out rate) || rate <= 0)
+                    {
+                        Console.WriteLine("Ошибка! Введите корректный курс.");
+                        return;
+                    }
+                    Console.Write("Введите название валюты: ");
+                    currencyName = Console.ReadLine().Trim();
+                    if (string.IsNullOrEmpty(currencyName))
+                        currencyName = "Валюта";
+                    break;
+                default:
+                    Console.WriteLine("Неверный выбор.");
+                    return;
+            }
+
+            Console.Clear();
+            Console.WriteLine($"Конвертация в {currencyName.ToUpper()}");
+            Console.WriteLine($"Курс: 1 {currencyName} = {rate:F2} Руб.");
+
+            Console.WriteLine($"{"№",-4} {"Название",-30} {"Сумма (Руб.)",12} {currencyName,12}");
+            Console.WriteLine(new string('-', 60));
+
+            for (int i = 0; i < expenses.Count; i++)
+            {
+                decimal converted = expenses[i].Value / rate;
+                Console.WriteLine($"{i + 1,-4} {expenses[i].Key,-30} {expenses[i].Value,12:F2} {converted,12:F2}");
+            }
+
+            decimal totalRub = expenses.Sum(e => e.Value);
+            decimal totalConverted = totalRub / rate;
+            Console.WriteLine(new string('-', 60));
+            Console.WriteLine($"{"Итого:",-36} {totalRub,12:F2} {totalConverted,12:F2}");
         }
     }
 }
