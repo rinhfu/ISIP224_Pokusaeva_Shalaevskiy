@@ -36,7 +36,16 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
                     case "4":
                         CurencyConversion();
                         break;
-
+                    case "5":
+                        SearchByName();
+                        break;
+                    case "0":
+                        exit = true;
+                        Console.WriteLine("Программа завершена. До свидания!");
+                        break;
+                    default:
+                        Console.WriteLine("Неверный выбор. Попробуйте снова.");
+                        break;
                 }
 
                 if (!exit)
@@ -240,6 +249,43 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
             decimal totalConverted = totalRub / rate;
             Console.WriteLine(new string('-', 60));
             Console.WriteLine($"{"Итого:",-36} {totalRub,12:F2} {totalConverted,12:F2}");
+        }
+
+        static void SearchByName()
+        {
+            Console.Clear();
+            Console.WriteLine("Поиск по названию:");
+
+            Console.Write("Введите ключевое слово для поиска: ");
+            string searchTerm = Console.ReadLine().Trim();
+
+            if (string.IsNullOrEmpty(searchTerm))
+            {
+                Console.WriteLine("Поисковый запрос не может быть пустым.");
+                return;
+            }
+
+            var results = expenses.Where(e => e.Key.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+
+            Console.Clear();
+            Console.WriteLine($"Результаты поиска: \"{searchTerm}\"");
+
+            if (results.Count == 0)
+            {
+                Console.WriteLine("Совпадений не найдено.");
+                return;
+            }
+
+            Console.WriteLine($"{"№",-4} {"Название",-30} {"Сумма (Руб.)",10}");
+            Console.WriteLine(new string('-', 46));
+
+            for (int i = 0; i < results.Count; i++)
+            {
+                Console.WriteLine($"{i + 1,-4} {results[i].Key,-30} {results[i].Value,10:F2}");
+            }
+
+            Console.WriteLine(new string('-', 46));
+            Console.WriteLine($"Найдено совпадений: {results.Count}");
         }
     }
 }
