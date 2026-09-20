@@ -97,6 +97,149 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
         public override string ToString() => $"Код: {Code} | Название: {Name} | Цена: {Price} Руб. | Кол-во: {Quantity} | В наличии: {(InStock ? "Да" : "Нет")} | Категория: {Category}";
     }
 
+    public class Store
+    {
+        private readonly List<Product> _products = new List<Product>();
+
+        public Store() => SeedTestData();
+
+        private void SeedTestData()
+        {
+            _products.Add(new Product("Хлеб Бородинский", 45.50m, 30, Category.Food));
+            _products.Add(new Product("Молоко 3.2%", 89.90m, 20, Category.Food));
+            _products.Add(new Product("Смартфон Samsung", 25999.00m, 5, Category.Electronics));
+            _products.Add(new Product("Наушники Sony", 7990.00m, 12, Category.Electronics));
+            _products.Add(new Product("Футболка мужская", 1200.00m, 0, Category.Clothing));
+        }
+
+        public void AddProduct()
+        {
+            Console.WriteLine("--- Добавление товара ---");
+            string name = InputHelper.ReadNonEmptyString("Введите название: ");
+            decimal price = InputHelper.ReadPositiveDecimal("Введите цену: ");
+            int quantity = InputHelper.ReadPositiveInt("Введите количество: ");
+            Category category = InputHelper.ReadCategory();
+
+            Product p = new Product(name, price, quantity, category);
+            _products.Add(p);
+            Console.WriteLine($"Товар успешно добавлен. {p}");
+        }
+
+        public void RemoveProduct()
+        {
+            Console.WriteLine("--- Удаление товара ---");
+            ShowAll();
+            int code = InputHelper.ReadInt("\nВведите код товара: ");
+
+            Product product = _products.FirstOrDefault(p => p.Code == code);
+            if (product == null)
+            {
+                Console.WriteLine("Товар с таким кодом не найден.");
+                return;
+            }
+
+            _products.Remove(product);
+            Console.WriteLine($"Товар \"{product.Name}\" удалён из списка.");
+        }
+
+        public void RestockProduct()
+        {
+            Console.WriteLine("--- Поставка товара ---");
+            ShowAll();
+            int code = InputHelper.ReadInt("\nВведите код товара: ");
+
+            Product product = _products.FirstOrDefault(p => p.Code == code);
+            if (product == null)
+            {
+                Console.WriteLine("Товар с таким кодом не найден.");
+                return;
+            }
+
+            int amount = InputHelper.ReadPositiveInt("Введите количество для поставки: ");
+            product.Restock(amount);
+        }
+
+        public void SellProduct()
+        {
+            Console.WriteLine("\n--- Продажа товара ---");
+            ShowAll();
+            int code = InputHelper.ReadInt("\nВведите код товара: ");
+
+            Product product = _products.FirstOrDefault(p => p.Code == code);
+            if (product == null)
+            {
+                Console.WriteLine("Товар с таким кодом не найден.");
+                return;
+            }
+
+            if (!product.InStock)
+            {
+                Console.WriteLine("Товара нет в наличии, продажа невозможна.");
+                return;
+            }
+
+            int amount = InputHelper.ReadPositiveInt("Введите количество для продажи: ");
+            product.Sell(amount);
+        }
+
+        public void SearchProducts()
+        {
+            Console.WriteLine("--- Поиск товаров ---");
+            Console.WriteLine("1. По коду");
+            Console.WriteLine("2. По названию");
+            Console.WriteLine("3. По категории");
+
+            int choice = InputHelper.ReadInt("Выберите вариант поиска: ");
+
+            List<Product> results = new List<Product>();
+
+            switch (choice)
+            {
+                case 1:
+                    int code = InputHelper.ReadInt("Введите код: ");
+                    results = _products.Where(p => p.Code == code).ToList();
+                    break;
+                case 2:
+                    string name = InputHelper.ReadNonEmptyString("Введите часть названия: ");
+                    results = _products.Where(p => p.Name.IndexOf(name, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+                    break;
+                case 3:
+                    Category cat = InputHelper.ReadCategory();
+                    results = _products.Where(p => p.Category == cat).ToList();
+                    break;
+                default:
+                    Console.WriteLine("Неверный вариант поиска.");
+                    return;
+            }
+
+            if (results.Count == 0)
+            {
+                Console.WriteLine("Ничего не найдено.");
+                return;
+            }
+
+            Console.WriteLine($"\nНайдено товаров: {results.Count}");
+            foreach (Product p in results)
+            {
+                Console.WriteLine(p);
+            }
+        }
+
+        public void ShowAll()
+        {
+            Console.WriteLine("--- Список всех товаров ---");
+            if (_products.Count == 0)
+            {
+                Console.WriteLine("Список товаров пуст.");
+                return;
+            }
+
+            foreach (Product p in _products)
+            {
+                Console.WriteLine(p);
+            }
+        }
+    }
 
     public static class InputHelper
     {
