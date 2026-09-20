@@ -96,4 +96,101 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
 
         public override string ToString() => $"Код: {Code} | Название: {Name} | Цена: {Price} Руб. | Кол-во: {Quantity} | В наличии: {(InStock ? "Да" : "Нет")} | Категория: {Category}";
     }
+
+
+    public static class InputHelper
+    {
+        public static string ReadNonEmptyString(string prompt)
+        {
+            while (true)
+            {
+                Console.Write(prompt);
+                string input = Console.ReadLine();
+
+                if (string.IsNullOrWhiteSpace(input))
+                {
+                    Console.WriteLine("Ошибка: значение не может быть пустым. Попробуйте ещё раз.");
+                    continue;
+                }
+                return input.Trim();
+            }
+        }
+
+        public static decimal ReadPositiveDecimal(string prompt)
+        {
+            while (true)
+            {
+                Console.Write(prompt);
+                string input = Console.ReadLine();
+
+                if (!decimal.TryParse(input, out decimal value))
+                {
+                    Console.WriteLine("Ошибка: введите корректное число.");
+                    continue;
+                }
+                if (value < 0)
+                {
+                    Console.WriteLine("Ошибка: значение не может быть отрицательным.");
+                    continue;
+                }
+                return value;
+            }
+        }
+
+        public static int ReadPositiveInt(string prompt)
+        {
+            while (true)
+            {
+                Console.Write(prompt);
+                string input = Console.ReadLine();
+
+                if (!int.TryParse(input, out int value))
+                {
+                    Console.WriteLine("Ошибка: введите корректное целое число.");
+                    continue;
+                }
+                if (value < 0)
+                {
+                    Console.WriteLine("Ошибка: значение не может быть отрицательным.");
+                    continue;
+                }
+                return value;
+            }
+        }
+
+        public static Category ReadCategory()
+        {
+            Console.WriteLine("Доступные категории:");
+            foreach (Category c in Enum.GetValues(typeof(Category)))
+            {
+                Console.WriteLine($"  {(int)c}. {c}");
+            }
+
+            while (true)
+            {
+                Console.Write("Выберите номер категории: ");
+                string input = Console.ReadLine();
+
+                if (int.TryParse(input, out int value) && Enum.IsDefined(typeof(Category), value))
+                {
+                    return (Category)value;
+                }
+                Console.WriteLine("Ошибка: выберите категорию из списка.");
+            }
+        }
+
+        public static int ReadInt(string prompt)
+        {
+            while (true)
+            {
+                Console.Write(prompt);
+                string input = Console.ReadLine();
+
+                if (int.TryParse(input, out int value))
+                    return value;
+
+                Console.WriteLine("Ошибка: введите корректное целое число.");
+            }
+        }
+    }
 }
