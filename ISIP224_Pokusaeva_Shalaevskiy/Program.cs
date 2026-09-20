@@ -12,4 +12,13 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
         {
         }
     }
+
+    public enum Category
+    {
+        Food = 1,
+        Electronics = 2,
+        Clothing = 3,
+        Household = 4,
+        Toys = 5
+    }
 }
