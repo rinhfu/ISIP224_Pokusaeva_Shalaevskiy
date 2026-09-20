@@ -10,6 +10,52 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
     {
         static void Main(string[] args)
         {
+            Store store = new Store();
+
+            while (true)
+            {
+                PrintMenu();
+
+                string input = Console.ReadLine();
+
+                if (!int.TryParse(input, out int choice))
+                {
+                    Console.WriteLine("Ошибка: введите число из меню.");
+                    Console.WriteLine("\nНажмите любую клавишу для продолжения...");
+                    Console.ReadKey();
+                    continue;
+                }
+
+                Console.Clear();
+
+                switch (choice)
+                {
+                    case 1: store.ShowAll(); break;
+                    case 2: store.AddProduct(); break;
+                    case 3: store.RemoveProduct(); break;
+                    case 4: store.RestockProduct(); break;
+                    case 5: store.SellProduct(); break;
+                    case 6: store.SearchProducts(); break;
+                    case 0: Console.WriteLine("Выход из программы. До свидания!"); return;
+                    default: Console.WriteLine("Неверный пункт меню."); break;
+                }
+                Console.WriteLine("\nНажмите любую клавишу для продолжения...");
+                Console.ReadKey();
+            }
+        }
+
+        static void PrintMenu()
+        {
+            Console.Clear();
+            Console.WriteLine("УЧЁТ ТОВАРОВ В МАГАЗИНЕ");
+            Console.WriteLine("1. Показать все товары");
+            Console.WriteLine("2. Добавить товар");
+            Console.WriteLine("3. Удалить товар");
+            Console.WriteLine("4. Заказать поставку товара");
+            Console.WriteLine("5. Продать товар");
+            Console.WriteLine("6. Поиск товаров");
+            Console.WriteLine("0. Выход");
+            Console.Write("Выберите действие: ");
         }
     }
 
