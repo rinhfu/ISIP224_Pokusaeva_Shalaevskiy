@@ -36,6 +36,9 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
                     case 4: store.RestockProduct(); break;
                     case 5: store.SellProduct(); break;
                     case 6: store.SearchProducts(); break;
+                    case 7: store.ShowSalesHistory(); break;
+                    case 8: store.CancelLastSale(); break;
+                    case 9: store.ShowSalesReport(); break;
                     case 0: Console.WriteLine("Выход из программы. До свидания!"); return;
                     default: Console.WriteLine("Неверный пункт меню."); break;
                 }
@@ -54,6 +57,9 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
             Console.WriteLine("4. Заказать поставку товара");
             Console.WriteLine("5. Продать товар");
             Console.WriteLine("6. Поиск товаров");
+            Console.WriteLine("7. История продаж");
+            Console.WriteLine("8. Отменить последнюю продажу");
+            Console.WriteLine("9. Отчёт о продажах");
             Console.WriteLine("0. Выход");
             Console.Write("Выберите действие: ");
         }
