@@ -287,6 +287,35 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
         }
     }
 
+    public class SaleRecord
+    {
+        public int ProductCode { get; }
+        public string ProductName { get; }
+        public Category Category { get; }
+        public decimal Price { get; }
+        public int Quantity { get; }
+        public DateTime SaleDate { get; }
+
+        public decimal TotalSum => Price * Quantity;
+
+        public SaleRecord(Product product, int quantity)
+        {
+            ProductCode = product.Code;
+            ProductName = product.Name;
+            Category = product.Category;
+            Price = product.Price;
+            Quantity = quantity;
+            SaleDate = DateTime.Now;
+        }
+
+        public override string ToString()
+        {
+            return $"[{SaleDate:dd.MM.yyyy HH:mm:ss}] " +
+                   $"Код: {ProductCode} | {ProductName} | " +
+                   $"{Quantity} шт. × {Price} Руб. = {TotalSum} Руб. | Категория: {Category}";
+        }
+    }
+
     public static class InputHelper
     {
         public static string ReadNonEmptyString(string prompt)
