@@ -147,6 +147,8 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
     {
         private readonly List<Product> _products = new List<Product>();
 
+        private readonly Stack<SaleRecord> _salesHistory = new Stack<SaleRecord>();
+
         public Store() => SeedTestData();
 
         private void SeedTestData()
@@ -208,8 +210,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
         public void SellProduct()
         {
             Console.WriteLine("\n--- Продажа товара ---");
-            ShowAll();
-            int code = InputHelper.ReadInt("\nВведите код товара: ");
+            int code = InputHelper.ReadInt("Введите код товара: ");
 
             Product product = _products.FirstOrDefault(p => p.Code == code);
             if (product == null)
@@ -225,9 +226,136 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
             }
 
             int amount = InputHelper.ReadPositiveInt("Введите количество для продажи: ");
-            product.Sell(amount);
+            if (amount > product.Quantity)
+            {
+                Console.WriteLine($"Недостаточно товара на складе. Доступно: {product.Quantity}.");
+                return;
+            }
+
+            SaleRecord record = new SaleRecord(product, amount);
+
+            if (product.Sell(amount))
+            {
+                _salesHistory.Push(record);
+                Console.WriteLine($"Продажа записана в историю. Сумма: {record.TotalSum:C}");
+            }
         }
 
+        public void CancelLastSale()
+        {
+            Console.WriteLine("\n--- Отмена последней продажи ---");
+
+            if (_salesHistory.Count == 0)
+            {
+                Console.WriteLine("История продаж пуста — отменять нечего.");
+                return;
+            }
+
+            SaleRecord last = _salesHistory.Peek();
+            Console.WriteLine($"Последняя продажа: {last}");
+            Console.Write("Отменить её? (y/n): ");
+            string answer = Console.ReadLine()?.Trim().ToLower();
+
+            if (answer != "y" && answer != "yes" && answer != "д" && answer != "да")
+            {
+                Console.WriteLine("Отмена отклонена.");
+                return;
+            }
+
+            _salesHistory.Pop();
+
+            Product product = _products.FirstOrDefault(p => p.Code == last.ProductCode);
+            if (product == null)
+            {
+                Console.WriteLine("Внимание: товар с таким кодом удалён из каталога. " +
+                                  "Возврат на склад невозможен.");
+                return;
+            }
+
+            product.Restock(last.Quantity);
+            Console.WriteLine($"Продажа отменена. {last.Quantity} шт. товара \"{last.ProductName}\" " +
+                              $"возвращены на склад.");
+        }
+
+        public void ShowSalesHistory()
+        {
+            Console.WriteLine("\n--- История продаж ---");
+
+            if (_salesHistory.Count == 0)
+            {
+                Console.WriteLine("История продаж пуста.");
+                return;
+            }
+
+            Console.WriteLine($"Всего записей: {_salesHistory.Count}");
+            Console.WriteLine("(от последней к первой)");
+            Console.WriteLine(new string('-', 80));
+
+            foreach (SaleRecord record in _salesHistory)
+            {
+                Console.WriteLine(record);
+            }
+        }
+
+        public void ShowSalesReport()
+        {
+            Console.WriteLine("\n--- Отчёт о продажах ---");
+
+            if (_salesHistory.Count == 0)
+            {
+                Console.WriteLine("Продаж ещё не было — отчёт пуст.");
+                return;
+            }
+
+            var report = _salesHistory
+                .GroupBy(s => new { s.ProductCode, s.ProductName, s.Category })
+                .Select(g => new
+                {
+                    g.Key.ProductCode,
+                    g.Key.ProductName,
+                    g.Key.Category,
+                    TotalQuantity = g.Sum(s => s.Quantity),
+                    TotalSum = g.Sum(s => s.TotalSum)
+                })
+                .OrderBy(r => r.ProductCode)
+                .ToList();
+
+            Console.WriteLine(new string('=', 95));
+            Console.WriteLine($"{"Код",-8}{"Название",-28}{"Категория",-15}{"Кол-во",10}{"Сумма",20}");
+            Console.WriteLine(new string('-', 95));
+
+            int grandQuantity = 0;
+            decimal grandTotal = 0m;
+
+            foreach (var row in report)
+            {
+                Console.WriteLine(
+                    $"{row.ProductCode,-8}" +
+                    $"{Truncate(row.ProductName, 26),-28}" +
+                    $"{row.Category,-15}" +
+                    $"{row.TotalQuantity,10}" +
+                    $"{row.TotalSum,20} Руб.");
+
+                grandQuantity += row.TotalQuantity;
+                grandTotal += row.TotalSum;
+            }
+
+            Console.WriteLine(new string('-', 95));
+            Console.WriteLine($"{"ИТОГО:",-51}{grandQuantity,10}{grandTotal,20:C}");
+            Console.WriteLine(new string('=', 95));
+
+            Console.WriteLine($"\nУникальных товаров продано: {report.Count}");
+            Console.WriteLine($"Всего операций продажи:    {_salesHistory.Count}");
+            Console.WriteLine($"Общая выручка:             {grandTotal} Руб.");
+        }
+
+        private static string Truncate(string text, int maxLength)
+        {
+            if (string.IsNullOrEmpty(text) || text.Length <= maxLength)
+                return text ?? string.Empty;
+            return text.Substring(0, maxLength - 1) + "…";
+        }
+    
         public void SearchProducts()
         {
             Console.WriteLine("--- Поиск товаров ---");
