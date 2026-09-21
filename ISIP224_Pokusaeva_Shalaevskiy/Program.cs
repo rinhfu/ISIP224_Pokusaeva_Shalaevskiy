@@ -215,8 +215,9 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
 
         public void SellProduct()
         {
-            Console.WriteLine("\n--- Продажа товара ---");
-            int code = InputHelper.ReadInt("Введите код товара: ");
+            Console.WriteLine("--- Продажа товара ---");
+            ShowAll();
+            int code = InputHelper.ReadInt("\nВведите код товара: ");
 
             Product product = _products.FirstOrDefault(p => p.Code == code);
             if (product == null)
@@ -243,13 +244,13 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
             if (product.Sell(amount))
             {
                 _salesHistory.Push(record);
-                Console.WriteLine($"Продажа записана в историю. Сумма: {record.TotalSum:C}");
+                Console.WriteLine($"Продажа записана в историю. Сумма: {record.TotalSum} Руб.");
             }
         }
 
         public void CancelLastSale()
         {
-            Console.WriteLine("\n--- Отмена последней продажи ---");
+            Console.WriteLine("--- Отмена последней продажи ---");
 
             if (_salesHistory.Count == 0)
             {
@@ -285,7 +286,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
 
         public void ShowSalesHistory()
         {
-            Console.WriteLine("\n--- История продаж ---");
+            Console.WriteLine("--- История продаж ---");
 
             if (_salesHistory.Count == 0)
             {
@@ -295,7 +296,6 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
 
             Console.WriteLine($"Всего записей: {_salesHistory.Count}");
             Console.WriteLine("(от последней к первой)");
-            Console.WriteLine(new string('-', 80));
 
             foreach (SaleRecord record in _salesHistory)
             {
@@ -305,7 +305,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
 
         public void ShowSalesReport()
         {
-            Console.WriteLine("\n--- Отчёт о продажах ---");
+            Console.WriteLine("--- Отчёт о продажах ---");
 
             if (_salesHistory.Count == 0)
             {
@@ -326,9 +326,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
                 .OrderBy(r => r.ProductCode)
                 .ToList();
 
-            Console.WriteLine(new string('=', 95));
             Console.WriteLine($"{"Код",-8}{"Название",-28}{"Категория",-15}{"Кол-во",10}{"Сумма",20}");
-            Console.WriteLine(new string('-', 95));
 
             int grandQuantity = 0;
             decimal grandTotal = 0m;
@@ -346,13 +344,11 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
                 grandTotal += row.TotalSum;
             }
 
-            Console.WriteLine(new string('-', 95));
-            Console.WriteLine($"{"ИТОГО:",-51}{grandQuantity,10}{grandTotal,20:C}");
-            Console.WriteLine(new string('=', 95));
+            Console.WriteLine($"{"ИТОГО:",-51}{grandQuantity,10}{grandTotal,20} Руб.");
 
             Console.WriteLine($"\nУникальных товаров продано: {report.Count}");
-            Console.WriteLine($"Всего операций продажи:    {_salesHistory.Count}");
-            Console.WriteLine($"Общая выручка:             {grandTotal} Руб.");
+            Console.WriteLine($"Всего операций продажи:      {_salesHistory.Count}");
+            Console.WriteLine($"Общая выручка:               {grandTotal} Руб.");
         }
 
         private static string Truncate(string text, int maxLength)
@@ -446,7 +442,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
         {
             return $"[{SaleDate:dd.MM.yyyy HH:mm:ss}] " +
                    $"Код: {ProductCode} | {ProductName} | " +
-                   $"{Quantity} шт. × {Price} Руб. = {TotalSum} Руб. | Категория: {Category}";
+                   $"{Quantity} шт. х {Price} Руб. = {TotalSum} Руб. | Категория: {Category}";
         }
     }
 
