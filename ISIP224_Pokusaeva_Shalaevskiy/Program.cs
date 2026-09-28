@@ -166,5 +166,35 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
         }
     }
 
+    public class StatsStorage
+    {
+        private readonly List<TextStats> _history = new List<TextStats>();
+
+        public void Add(TextStats stats)
+        {
+            _history.Add(stats);
+        }
+
+        public int Count
+        {
+            get { return _history.Count; }
+        }
+
+        public TextStats GetAt(int index)
+        {
+            if (index < 0 || index >= _history.Count)
+            {
+                return null;
+            }
+            return _history[index];
+        }
+
+        public List<TextStats> GetAll()
+        {
+            return _history;
+        }
+    }
+
+    
 }
 
