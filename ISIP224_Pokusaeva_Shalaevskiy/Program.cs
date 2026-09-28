@@ -195,6 +195,112 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
         }
     }
 
-    
+    internal class Program
+    {
+        private static StatsStorage _storage = new StatsStorage();
+
+        private static void Main(string[] args)
+        {
+
+            bool running = true;
+
+            while (running)
+            {
+                PrintMenu();
+                string choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        AnalyzeNewText();
+                        break;
+                    case "2":
+                        ShowHistory();
+                        break;
+                    case "0":
+                        running = false;
+                        Console.WriteLine("До свидания!");
+                        break;
+                    default:
+                        Console.WriteLine("Неверный пункт меню. Попробуйте снова.");
+                        break;
+                }
+            }
+        }
+
+        private static void PrintMenu()
+        {
+            Console.WriteLine();
+            Console.WriteLine("      АНАЛИЗ ТЕКСТА      ");
+            Console.WriteLine("1 - Ввести новый текст для анализа");
+            Console.WriteLine("2 - Показать статистику по прошлым текстам");
+            Console.WriteLine("0 - Выход");
+            Console.Write("Ваш выбор: ");
+        }
+
+        private static void AnalyzeNewText()
+        {
+            Console.WriteLine("Введите текст (минимум 100 символов).");
+            Console.WriteLine("Для завершения ввода нажмите Enter дважды:");
+
+            StringBuilder sb = new StringBuilder();
+            string line;
+
+            while (true)
+            {
+                line = Console.ReadLine();
+
+                if (string.IsNullOrEmpty(line))
+                {
+                    break;
+                }
+
+                sb.AppendLine(line);
+            }
+
+            string text = sb.ToString().TrimEnd('\r', '\n');
+
+            if (!TextAnalyzer.IsValidLength(text))
+            {
+                Console.WriteLine($"Текст слишком короткий ({text.Length} символов). Нужно минимум 100.");
+                return;
+            }
+
+            TextStats stats = TextAnalyzer.Analyze(text);
+            _storage.Add(stats);
+
+            Console.WriteLine();
+            Console.WriteLine("Анализ завершён. Результаты:");
+            stats.Print();
+        }
+
+        private static void ShowHistory()
+        {
+            if (_storage.Count == 0)
+            {
+                Console.WriteLine("История пуста. Сначала проанализируйте хотя бы один текст.");
+                return;
+            }
+
+            Console.WriteLine($"Всего проанализировано текстов: {_storage.Count}");
+
+            for (int i = 0; i < _storage.Count; i++)
+            {
+                TextStats s = _storage.GetAt(i);
+                Console.WriteLine();
+                Console.WriteLine($"     Текст #{i + 1}     ");
+                Console.WriteLine($"Слов: {s.WordCount}, Предложений: {s.SentenceCount}, " +
+                                    $"Гласных: {s.VowelCount}, Согласных: {s.ConsonantCount}");
+                Console.WriteLine($"Короткое слово: {s.ShortestWord}, Длинное: {s.LongestWord}");
+
+                Console.Write("Вывести полную статистику по этому тексту? (y/n): ");
+                string answer = Console.ReadLine();
+                if (answer != null && answer.ToLower() == "y")
+                {
+                    s.Print();
+                }
+            }
+        }
+    }
 }
 
