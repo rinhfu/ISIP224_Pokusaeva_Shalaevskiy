@@ -49,7 +49,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
                 Console.Write("Выбор: ");
 
                 string choice = Console.ReadLine();
-                Console.WriteLine();
+                Console.Clear();
 
                 try
                 {
@@ -104,6 +104,9 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
         private static void RemoveBookFlow()
         {
             Console.WriteLine("--- Удаление книги ---");
+            Console.WriteLine($"  {"ID:",-3}|{"Название:",-30}|{"Автор:",-20}|{"Жанр:",-10}|{"Год:",-4}|{"Цена:",9}");
+            Console.WriteLine("-----------------------------------------------------------------------------------");
+            PrintBooks(Library.Books);
             if (Library.Books.Count == 0)
             {
                 Console.WriteLine("Список книг пуст.");
@@ -112,9 +115,9 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
 
             int id = InputHelper.ReadInt("Введите ID книги для удаления: ", 1, int.MaxValue);
             if (Library.RemoveBook(id))
-                Console.WriteLine("[OK] Книга с ID={0} удалена.", id);
+                Console.WriteLine("[OK] Книга с ID: {0} удалена.", id);
             else
-                Console.WriteLine("[!] Книга с ID={0} не найдена.", id);
+                Console.WriteLine("[!] Книга с ID: {0} не найдена.", id);
         }
 
         private static void FindBooksFlow()
@@ -476,6 +479,4 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
             }
         }
     }
-
-    
 }
