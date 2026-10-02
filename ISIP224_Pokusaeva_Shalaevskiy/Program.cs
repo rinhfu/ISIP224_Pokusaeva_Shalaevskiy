@@ -10,6 +10,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
     public static class Program
     {
         private static readonly Library Library = new Library();
+        private static readonly List<Book> Cart = new List<Book>();
 
         public static void Main()
         {
@@ -40,6 +41,9 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
                 Console.WriteLine(" 6. Сгруппировать по авторам");
                 Console.WriteLine(" 7. Показать все книги");
                 Console.WriteLine(" 8. Вставить блок книг (пакетный импорт)");
+                Console.WriteLine(" 9. Добавить книгу в корзину");
+                Console.WriteLine("10. Показать корзину и итоговую стоимость");
+                Console.WriteLine("11. Очистить корзину");
                 Console.WriteLine(" 0. Выход");
                 Console.WriteLine("===========================================");
                 Console.Write("Выбор: ");
@@ -63,6 +67,12 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
                             PrintBooks(Library.Books); 
                             break;
                         case "8": BatchImportFlow(); break;
+                        case "9": AddToCartFlow(); break;
+                        case "10": ShowCart(); break;
+                        case "11":
+                            Cart.Clear();
+                            Console.WriteLine("Корзина очищена.");
+                            break;
                         case "0": return;
                         default: Console.WriteLine("Неизвестная команда."); break;
                     }
@@ -310,6 +320,43 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
             title = parts[0];
             author = parts[1];
             return true;
+        }
+
+        private static void AddToCartFlow()
+        {
+            Console.WriteLine("--- Добавление в корзину ---");
+            if (Library.Books.Count == 0)
+            {
+                Console.WriteLine("Список книг пуст.");
+                return;
+            }
+
+            PrintBooks(Library.Books);
+            int id = InputHelper.ReadInt("\nВведите ID книги для добавления в корзину: ", 1, int.MaxValue);
+
+            Book book = Library.Books.FirstOrDefault(b => b.Id == id);
+            if (book == null)
+            {
+                Console.WriteLine("[!] Книга с ID={0} не найдена.", id);
+                return;
+            }
+
+            Cart.Add(book);
+            Console.WriteLine("[OK] \"{0}\" добавлена в корзину.", book.Title);
+        }
+
+        private static void ShowCart()
+        {
+            Console.WriteLine("--- Корзина ---");
+            if (Cart.Count == 0)
+            {
+                Console.WriteLine("Корзина пуста.");
+                return;
+            }
+
+            PrintBooks(Cart);
+            decimal total = Cart.Sum(b => b.Price);
+            Console.WriteLine("\nИтоговая стоимость: {0}Руб.", total);
         }
     }
 
