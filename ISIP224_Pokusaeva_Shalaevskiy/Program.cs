@@ -39,6 +39,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
                 Console.WriteLine(" 5. Самая дорогая / самая дешёвая книга");
                 Console.WriteLine(" 6. Сгруппировать по авторам");
                 Console.WriteLine(" 7. Показать все книги");
+                Console.WriteLine(" 8. Вставить блок книг (пакетный импорт)");
                 Console.WriteLine(" 0. Выход");
                 Console.WriteLine("===========================================");
                 Console.Write("Выбор: ");
@@ -61,6 +62,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
                             Console.WriteLine("-----------------------------------------------------------------------------------");
                             PrintBooks(Library.Books); 
                             break;
+                        case "8": BatchImportFlow(); break;
                         case "0": return;
                         default: Console.WriteLine("Неизвестная команда."); break;
                     }
@@ -217,6 +219,97 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
             foreach (Book b in list)
                 Console.WriteLine("  " + b);
             Console.WriteLine("\n  Всего: " + list.Count);
+        }
+
+        private static void BatchImportFlow()
+        {
+            Console.WriteLine("--- Пакетный импорт книг ---");
+            Console.WriteLine("Формат строки: Название;Автор;Жанр;Год;Цена");
+            Console.WriteLine("Жанр можно указать именем (Fiction, Science, ...).");
+            Console.WriteLine("Введите пустую строку, чтобы закончить.\n");
+
+            int added = 0;
+            int lineNum = 0;
+
+            while (true)
+            {
+                lineNum++;
+                Console.Write("Строка {0}: ", lineNum);
+                string line = Console.ReadLine();
+
+                if (string.IsNullOrWhiteSpace(line)) break;
+
+                string title, author, error;
+                Genre genre;
+                int year;
+                decimal price;
+
+                if (!TryParseBookLine(line, out title, out author, out genre,
+                        out year, out price, out error))
+                {
+                    Console.WriteLine("  [!] Пропущено: " + error);
+                    continue;
+                }
+
+                Book book = Library.AddBook(title, author, genre, year, price);
+                Console.WriteLine("  [OK] Добавлено: " + book);
+                added++;
+            }
+
+            Console.WriteLine("\nИтого добавлено книг: " + added);
+        }
+
+        private static bool TryParseBookLine(
+            string line,
+            out string title, out string author, out Genre genre,
+            out int year, out decimal price, out string error)
+        {
+            title = string.Empty;
+            author = string.Empty;
+            genre = default(Genre);
+            year = 0;
+            price = 0;
+            error = string.Empty;
+
+            string[] parts = line.Split(';');
+            if (parts.Length != 5)
+            {
+                error = "ожидается 5 полей, разделённых ';'";
+                return false;
+            }
+
+            for (int i = 0; i < parts.Length; i++) parts[i] = parts[i].Trim();
+
+            if (string.IsNullOrWhiteSpace(parts[0])) { error = "пустое название"; return false; }
+            if (string.IsNullOrWhiteSpace(parts[1])) { error = "пустой автор"; return false; }
+
+            try
+            {
+                genre = (Genre)Enum.Parse(typeof(Genre), parts[2], true);
+            }
+            catch
+            {
+                error = "неизвестный жанр '" + parts[2] + "'";
+                return false;
+            }
+
+            if (!int.TryParse(parts[3], out year) || year < 1000 || year > 2100)
+            {
+                error = "некорректный год '" + parts[3] + "'";
+                return false;
+            }
+
+            string priceStr = parts[4].Replace(',', '.');
+            if (!decimal.TryParse(priceStr, NumberStyles.Number,
+                    CultureInfo.InvariantCulture, out price) || price <= 0)
+            {
+                error = "некорректная цена '" + parts[4] + "'";
+                return false;
+            }
+
+            title = parts[0];
+            author = parts[1];
+            return true;
         }
     }
 
