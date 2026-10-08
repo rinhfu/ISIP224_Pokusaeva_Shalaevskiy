@@ -190,4 +190,61 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
             return $"[Курс #{Id}] {Title}, {Hours} ч., цена: {Price:C}, преподаватель: {teacherInfo}, студентов: {Students.Count}";
         }
     }
+    public class University
+    {
+        private readonly List<Student> _students = new List<Student>();
+        private readonly List<Teacher> _teachers = new List<Teacher>();
+        private readonly List<Course> _courses = new List<Course>();
+
+        public IReadOnlyList<Student> Students => _students;
+        public IReadOnlyList<Teacher> Teachers => _teachers;
+        public IReadOnlyList<Course> Courses => _courses;
+
+        public void AddStudent(Student s)
+        {
+            if (s == null) throw new ArgumentNullException(nameof(s));
+            _students.Add(s);
+        }
+
+        public void AddTeacher(Teacher t)
+        {
+            if (t == null) throw new ArgumentNullException(nameof(t));
+            _teachers.Add(t);
+        }
+
+        public void AddCourse(Course c)
+        {
+            if (c == null) throw new ArgumentNullException(nameof(c));
+            _courses.Add(c);
+        }
+
+        public Student FindStudent(int id) => _students.FirstOrDefault(s => s.Id == id);
+        public Teacher FindTeacher(int id) => _teachers.FirstOrDefault(t => t.Id == id);
+        public Course FindCourse(int id) => _courses.FirstOrDefault(c => c.Id == id);
+
+        public void EnrollStudent(int studentId, int courseId)
+        {
+            var student = FindStudent(studentId)
+                ?? throw new InvalidOperationException("Студент не найден.");
+            var course = FindCourse(courseId)
+                ?? throw new InvalidOperationException("Курс не найден.");
+            course.Enroll(student);
+        }
+
+        public void AssignTeacher(int teacherId, int courseId)
+        {
+            var teacher = FindTeacher(teacherId)
+                ?? throw new InvalidOperationException("Преподаватель не найден.");
+            var course = FindCourse(courseId)
+                ?? throw new InvalidOperationException("Курс не найден.");
+            course.Teacher = teacher;
+        }
+
+        public List<Course> GetStudentCourses(int studentId)
+        {
+            var student = FindStudent(studentId);
+            if (student == null) return new List<Course>();
+            return _courses.Where(c => c.Students.Contains(student)).ToList();
+        }
+    }
 }
