@@ -124,4 +124,70 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
         public override string GetInfo()
             => $"[Преподаватель #{Id}] {Name}, {Age} лет, кафедра: {Department}, степень: {Degree}, email: {Email}";
     }
+    public class Course
+    {
+        private static int _counter = 1;
+        private string _title;
+        private decimal _price;
+        private int _hours;
+
+        public int Id { get; }
+        public Teacher Teacher { get; set; }
+        public List<Student> Students { get; } = new List<Student>();
+
+        public string Title
+        {
+            get => _title;
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ArgumentException("Название курса не может быть пустым.");
+                _title = value.Trim();
+            }
+        }
+
+        public decimal Price
+        {
+            get => _price;
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentException("Цена не может быть отрицательной.");
+                _price = value;
+            }
+        }
+
+        public int Hours
+        {
+            get => _hours;
+            set
+            {
+                if (value <= 0)
+                    throw new ArgumentException("Количество часов должно быть положительным.");
+                _hours = value;
+            }
+        }
+
+        public Course(string title, decimal price, int hours)
+        {
+            Title = title;
+            Price = price;
+            Hours = hours;
+            Id = _counter++;
+        }
+
+        public void Enroll(Student student)
+        {
+            if (student == null) throw new ArgumentNullException(nameof(student));
+            if (Students.Contains(student))
+                throw new InvalidOperationException("Студент уже записан на этот курс.");
+            Students.Add(student);
+        }
+
+        public string GetInfo()
+        {
+            string teacherInfo = Teacher != null ? Teacher.Name : "не назначен";
+            return $"[Курс #{Id}] {Title}, {Hours} ч., цена: {Price:C}, преподаватель: {teacherInfo}, студентов: {Students.Count}";
+        }
+    }
 }
