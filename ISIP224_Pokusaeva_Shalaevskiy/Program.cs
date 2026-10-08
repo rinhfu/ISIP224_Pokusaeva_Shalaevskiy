@@ -251,6 +251,44 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
     {
         private static readonly University uni = new University();
 
+        public static void Main()
+        {
+            while (true)
+            {
+                PrintMenu();
+                int choice = ReadInt("Выберите пункт: ", 0, 13);
+
+                try
+                {
+                    switch (choice)
+                    {
+                        case 0: return;
+                        case 1: AddStudent(); break;
+                        case 2: AddTeacher(); break;
+                        case 3: AddCourse(); break;
+                        case 4: ShowAllStudents(); break;
+                        case 5: ShowAllTeachers(); break;
+                        case 6: ShowAllCourses(); break;
+                        case 7: ShowStudentInfo(); break;
+                        case 8: ShowTeacherInfo(); break;
+                        case 9: ShowCourseInfo(); break;
+                        case 10: EnrollStudent(); break;
+                        case 11: AssignTeacher(); break;
+                        case 12: ShowStudentCourses(); break;
+                        case 13: ShowCourseStudents(); break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Ошибка: {ex.Message}");
+                }
+
+                Console.WriteLine("\nНажмите любую клавишу для продолжения...");
+                Console.ReadKey();
+                Console.Clear();
+            }
+        }
+
         private static void PrintMenu()
         {
             Console.WriteLine("========== УПРАВЛЕНИЕ УНИВЕРСИТЕТОМ ==========");
@@ -406,4 +444,5 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
             foreach (var s in course.Students) Console.WriteLine(s.GetInfo());
         }
     }
+
 }
