@@ -247,4 +247,163 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
             return _courses.Where(c => c.Students.Contains(student)).ToList();
         }
     }
+    public class Program
+    {
+        private static readonly University uni = new University();
+
+        private static void PrintMenu()
+        {
+            Console.WriteLine("========== УПРАВЛЕНИЕ УНИВЕРСИТЕТОМ ==========");
+            Console.WriteLine("1.  Добавить студента");
+            Console.WriteLine("2.  Добавить преподавателя");
+            Console.WriteLine("3.  Добавить курс");
+            Console.WriteLine("4.  Показать всех студентов");
+            Console.WriteLine("5.  Показать всех преподавателей");
+            Console.WriteLine("6.  Показать все курсы");
+            Console.WriteLine("7.  Информация о студенте");
+            Console.WriteLine("8.  Информация о преподавателе");
+            Console.WriteLine("9.  Информация о курсе");
+            Console.WriteLine("10. Записать студента на курс");
+            Console.WriteLine("11. Назначить преподавателя на курс");
+            Console.WriteLine("12. Курсы студента");
+            Console.WriteLine("13. Студенты курса");
+            Console.WriteLine("0.  Выход");
+            Console.WriteLine("==============================================");
+        }
+
+        private static string ReadString(string prompt)
+        {
+            while (true)
+            {
+                Console.Write(prompt);
+                string input = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(input)) return input.Trim();
+                Console.WriteLine("Поле не может быть пустым. Попробуйте снова.");
+            }
+        }
+
+        private static int ReadInt(string prompt, int min, int max)
+        {
+            while (true)
+            {
+                Console.Write(prompt);
+                if (int.TryParse(Console.ReadLine(), out int value) && value >= min && value <= max)
+                    return value;
+                Console.WriteLine($"Введите целое число от {min} до {max}.");
+            }
+        }
+
+        private static decimal ReadDecimal(string prompt, decimal min)
+        {
+            while (true)
+            {
+                Console.Write(prompt);
+                if (decimal.TryParse(Console.ReadLine(), out decimal value) && value >= min)
+                    return value;
+                Console.WriteLine($"Введите число не меньше {min}.");
+            }
+        }
+
+        private static void AddStudent()
+        {
+            string name = ReadString("Имя: ");
+            int age = ReadInt("Возраст: ", 16, 100);
+            string email = ReadString("Email: ");
+            string group = ReadString("Группа: ");
+            uni.AddStudent(new Student(name, age, email, group));
+            Console.WriteLine("Студент добавлен.");
+        }
+
+        private static void AddTeacher()
+        {
+            string name = ReadString("Имя: ");
+            int age = ReadInt("Возраст: ", 16, 100);
+            string email = ReadString("Email: ");
+            string dept = ReadString("Кафедра: ");
+            string degree = ReadString("Степень: ");
+            uni.AddTeacher(new Teacher(name, age, email, dept, degree));
+            Console.WriteLine("Преподаватель добавлен.");
+        }
+
+        private static void AddCourse()
+        {
+            string title = ReadString("Название курса: ");
+            decimal price = ReadDecimal("Цена: ", 0);
+            int hours = ReadInt("Часы: ", 1, 1000);
+            uni.AddCourse(new Course(title, price, hours));
+            Console.WriteLine("Курс добавлен.");
+        }
+
+        private static void ShowAllStudents()
+        {
+            if (!uni.Students.Any()) { Console.WriteLine("Студентов нет."); return; }
+            foreach (var s in uni.Students) Console.WriteLine(s.GetInfo());
+        }
+
+        private static void ShowAllTeachers()
+        {
+            if (!uni.Teachers.Any()) { Console.WriteLine("Преподавателей нет."); return; }
+            foreach (var t in uni.Teachers) Console.WriteLine(t.GetInfo());
+        }
+
+        private static void ShowAllCourses()
+        {
+            if (!uni.Courses.Any()) { Console.WriteLine("Курсов нет."); return; }
+            foreach (var c in uni.Courses) Console.WriteLine(c.GetInfo());
+        }
+
+        private static void ShowStudentInfo()
+        {
+            int id = ReadInt("ID студента: ", 1, int.MaxValue);
+            var s = uni.FindStudent(id);
+            Console.WriteLine(s != null ? s.GetInfo() : "Студент не найден.");
+        }
+
+        private static void ShowTeacherInfo()
+        {
+            int id = ReadInt("ID преподавателя: ", 1, int.MaxValue);
+            var t = uni.FindTeacher(id);
+            Console.WriteLine(t != null ? t.GetInfo() : "Преподаватель не найден.");
+        }
+
+        private static void ShowCourseInfo()
+        {
+            int id = ReadInt("ID курса: ", 1, int.MaxValue);
+            var c = uni.FindCourse(id);
+            Console.WriteLine(c != null ? c.GetInfo() : "Курс не найден.");
+        }
+
+        private static void EnrollStudent()
+        {
+            int sid = ReadInt("ID студента: ", 1, int.MaxValue);
+            int cid = ReadInt("ID курса: ", 1, int.MaxValue);
+            uni.EnrollStudent(sid, cid);
+            Console.WriteLine("Студент записан на курс.");
+        }
+
+        private static void AssignTeacher()
+        {
+            int tid = ReadInt("ID преподавателя: ", 1, int.MaxValue);
+            int cid = ReadInt("ID курса: ", 1, int.MaxValue);
+            uni.AssignTeacher(tid, cid);
+            Console.WriteLine("Преподаватель назначен на курс.");
+        }
+
+        private static void ShowStudentCourses()
+        {
+            int sid = ReadInt("ID студента: ", 1, int.MaxValue);
+            var courses = uni.GetStudentCourses(sid);
+            if (!courses.Any()) { Console.WriteLine("Студент ни на один курс не записан."); return; }
+            foreach (var c in courses) Console.WriteLine(c.GetInfo());
+        }
+
+        private static void ShowCourseStudents()
+        {
+            int cid = ReadInt("ID курса: ", 1, int.MaxValue);
+            var course = uni.FindCourse(cid);
+            if (course == null) { Console.WriteLine("Курс не найден."); return; }
+            if (!course.Students.Any()) { Console.WriteLine("На курс никто не записан."); return; }
+            foreach (var s in course.Students) Console.WriteLine(s.GetInfo());
+        }
+    }
 }
