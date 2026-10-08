@@ -187,7 +187,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
         public string GetInfo()
         {
             string teacherInfo = Teacher != null ? Teacher.Name : "не назначен";
-            return $"[Курс #{Id}] {Title}, {Hours} ч., цена: {Price:C}, преподаватель: {teacherInfo}, студентов: {Students.Count}";
+            return $"[Курс #{Id}] {Title}, {Hours} ч., цена: {Price}, преподаватель: {teacherInfo}, студентов: {Students.Count}";
         }
     }
     public class University
@@ -291,7 +291,8 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
 
         private static void PrintMenu()
         {
-            Console.WriteLine("========== УПРАВЛЕНИЕ УНИВЕРСИТЕТОМ ==========");
+            Console.WriteLine("              УПРАВЛЕНИЕ УНИВЕРСИТЕТОМ           ");
+            Console.WriteLine("==============================================");
             Console.WriteLine("1.  Добавить студента");
             Console.WriteLine("2.  Добавить преподавателя");
             Console.WriteLine("3.  Добавить курс");
@@ -316,7 +317,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
                 Console.Write(prompt);
                 string input = Console.ReadLine();
                 if (!string.IsNullOrWhiteSpace(input)) return input.Trim();
-                Console.WriteLine("Поле не может быть пустым. Попробуйте снова.");
+                Console.WriteLine("Поле не может быть пустым.");
             }
         }
 
