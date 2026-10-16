@@ -189,12 +189,12 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
         public ArchmageCpp() : base("Архимаг C++ (Босс-Маг)", (int)(20 * 1.8), (int)(6 * 1.6), (int)(2 * 1.1), 0.25 + 0.1) { }
     }
 
-    class PestovC : Skeleton
+    class PestovCmm : Skeleton
     {
         public double FreezeChance { get; } = 0.25 + 0.15;
         private Random rnd = new Random();
 
-        public PestovC() : base("Пестов С-- (Босс-Скелет)", (int)(25 * 1.3), (int)(7 * 1.8), (int)(2 * 0.6)) { }
+        public PestovCmm() : base("Пестов С-- (Босс-Скелет)", (int)(25 * 1.3), (int)(7 * 1.8), (int)(2 * 0.6)) { }
 
         public override int CalculateDamage(Player player)
         {
@@ -205,6 +205,53 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
                 player.IsFrozen = true;
             }
             return Attack;
+        }
+    }
+
+    static class EnemyFactory
+    {
+        private static Random rnd = new Random();
+
+        public static Enemy CreateRandomEnemy()
+        {
+            int type = rnd.Next(3);
+            switch (type)
+            {
+                case 0: return new Goblin("Гоблин", 30, 8, 3);
+                case 1: return new Skeleton("Скелет", 25, 7, 2);
+                default: return new Mage("Маг", 20, 6, 2);
+            }
+        }
+
+        public static Enemy CreateRandomBoss()
+        {
+            int type = rnd.Next(4);
+            switch (type)
+            {
+                case 0: return new VVG();
+                case 1: return new Kovalsky();
+                case 2: return new ArchmageCpp();
+                default: return new PestovCmm();
+            }
+        }
+    }
+
+    static class ItemFactory
+    {
+        private static Random rnd = new Random();
+
+        public static Item CreateRandomItem()
+        {
+            int type = rnd.Next(3);
+            switch (type)
+            {
+                case 0:
+                    return new Item("Лечебное зелье", ItemType.Potion);
+                case 1:
+                    return new Item("Меч", ItemType.Weapon, attackBonus: rnd.Next(2, 6));
+                default:
+                    return new Item("Щит", ItemType.Armor, defenseBonus: rnd.Next(1, 4));
+            }
         }
     }
 
