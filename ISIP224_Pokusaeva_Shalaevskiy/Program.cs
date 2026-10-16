@@ -10,7 +10,19 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
     {
         static void Main(string[] args)
         {
+            try
+            {
+                Game game = new Game();
+                game.Run();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\nПроизошла ошибка: {ex.Message}");
+            }
 
+            Console.WriteLine("\nНажмите Enter для выхода...");
+            Console.ReadLine();
+            Console.Clear();
         }
     }
 
@@ -192,7 +204,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
     class PestovCmm : Skeleton
     {
         public double FreezeChance { get; } = 0.25 + 0.15;
-        private Random rnd = new Random();
+        private readonly Random rnd = new Random();
 
         public PestovCmm() : base("Пестов С-- (Босс-Скелет)", (int)(25 * 1.3), (int)(7 * 1.8), (int)(2 * 0.6)) { }
 
@@ -210,7 +222,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
 
     static class EnemyFactory
     {
-        private static Random rnd = new Random();
+        private static readonly Random rnd = new Random();
 
         public static Enemy CreateRandomEnemy()
         {
@@ -238,7 +250,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
 
     static class ItemFactory
     {
-        private static Random rnd = new Random();
+        private static readonly Random rnd = new Random();
 
         public static Item CreateRandomItem()
         {
@@ -257,8 +269,8 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
 
     class Game
     {
-        private Player player;
-        private Random rnd = new Random();
+        private readonly Player player;
+        private readonly Random rnd = new Random();
         private int turnCounter = 0;
 
         public Game()
