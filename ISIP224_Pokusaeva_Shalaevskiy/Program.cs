@@ -117,6 +117,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
                     typeStr = "Зелье";
                     break;
             }
+            return $"[{RarityName(Rarity)}] {Name} ({typeStr})";
         }
     }
 
@@ -288,26 +289,26 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
 
     static class ItemFactory
     {
-        private static Random rnd = new Random();
+        private static readonly Random rnd = new Random();
 
         private static readonly (Rarity rarity, int weight)[] RarityWeights =
         {
-        (Rarity.Common,    50),
-        (Rarity.Uncommon,  25),
-        (Rarity.Rare,      15),
-        (Rarity.Epic,       8),
-        (Rarity.Legendary,  2)
-    };
+            (Rarity.Common,    50),
+            (Rarity.Uncommon,  25),
+            (Rarity.Rare,      15),
+            (Rarity.Epic,       8),
+            (Rarity.Legendary,  2)
+        };
 
         private static readonly (string name, int weight)[] WeaponNames =
         {
-        ("Кинжал", 30), ("Меч", 30), ("Топор", 20), ("Копьё", 15), ("Молот", 5)
-    };
+            ("Кинжал", 30), ("Меч", 30), ("Топор", 20), ("Копьё", 15), ("Молот", 5)
+        };
 
         private static readonly (string name, int weight)[] ArmorNames =
         {
-        ("Кожаная броня", 30), ("Кольчуга", 30), ("Щит", 20), ("Латы", 15), ("Драконья чешуя", 5)
-    };
+            ("Кожаная броня", 30), ("Кольчуга", 30), ("Щит", 20), ("Латы", 15), ("Драконья чешуя", 5)
+        };
 
         public static Rarity RollRarity()
         {
@@ -335,15 +336,18 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
             return pool[0].name;
         }
 
-        private static double RarityMultiplier(Rarity r) => r switch
+        private static double RarityMultiplier(Rarity r)
         {
-            Rarity.Common => 1.0,
-            Rarity.Uncommon => 1.3,
-            Rarity.Rare => 1.7,
-            Rarity.Epic => 2.2,
-            Rarity.Legendary => 3.0,
-            _ => 1.0
-        };
+            switch (r)
+            {
+                case Rarity.Common: return 1.0;
+                case Rarity.Uncommon: return 1.3;
+                case Rarity.Rare: return 1.7;
+                case Rarity.Epic: return 2.2;
+                case Rarity.Legendary: return 3.0;
+                default: return 1.0;
+            }
+        }
 
         public static Item CreateRandomItem()
         {
