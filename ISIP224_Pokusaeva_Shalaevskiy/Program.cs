@@ -30,6 +30,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
     enum BossTytpe { VVG, Kovalsky, ArchmageCpp, PestovCmm }
     enum ItemType { Potion, Weapon, Armor}
     enum PlayerAction { Attack, Defend }
+    enum Rarity { Common, Uncommon, Rare, Epic, Legendary }
 
     abstract class Entity
     {
@@ -61,24 +62,61 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
     {
         public string Name { get; set; }
         public ItemType Type { get; set; }
+        public Rarity Rarity { get; set; }
         public int AttackBonus { get; set; }
         public int DefenseBonus { get; set; }
 
-        public Item(string name, ItemType type, int attackBonus = 0, int defenseBonus = 0)
+        public Item(string name, ItemType type, Rarity rarity,
+                    int attackBonus = 0, int defenseBonus = 0)
         {
             Name = name;
             Type = type;
+            Rarity = rarity;
             AttackBonus = attackBonus;
             DefenseBonus = defenseBonus;
         }
 
+        public static string RarityName(Rarity r)
+        {
+            switch (r)
+            {
+                case Rarity.Common: return "Обычный";
+                case Rarity.Uncommon: return "Необычный";
+                case Rarity.Rare: return "Редкий";
+                case Rarity.Epic: return "Эпический";
+                case Rarity.Legendary: return "Легендарный";
+                default: return "?";
+            }
+        }
+
+        public static ConsoleColor RarityColor(Rarity r)
+        {
+            switch (r)
+            {
+                case Rarity.Common: return ConsoleColor.Gray;
+                case Rarity.Uncommon: return ConsoleColor.Green;
+                case Rarity.Rare: return ConsoleColor.Blue;
+                case Rarity.Epic: return ConsoleColor.Magenta;
+                case Rarity.Legendary: return ConsoleColor.Yellow;
+                default: return ConsoleColor.White;
+            }
+        }
+
         public override string ToString()
         {
-            if (Type == ItemType.Weapon)
-                return $"{Name} (Оружие, Атака +{AttackBonus})";
-            if (Type == ItemType.Armor)
-                return $"{Name} (Доспех, Защита +{DefenseBonus})";
-            return Name;
+            string typeStr;
+            switch (Type)
+            {
+                case ItemType.Weapon:
+                    typeStr = $"Оружие, Атака +{AttackBonus}";
+                    break;
+                case ItemType.Armor:
+                    typeStr = $"Доспех, Защита +{DefenseBonus}";
+                    break;
+                default:
+                    typeStr = "Зелье";
+                    break;
+            }
         }
     }
 
@@ -250,19 +288,84 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
 
     static class ItemFactory
     {
-        private static readonly Random rnd = new Random();
+        private static Random rnd = new Random();
+
+        private static readonly (Rarity rarity, int weight)[] RarityWeights =
+        {
+        (Rarity.Common,    50),
+        (Rarity.Uncommon,  25),
+        (Rarity.Rare,      15),
+        (Rarity.Epic,       8),
+        (Rarity.Legendary,  2)
+    };
+
+        private static readonly (string name, int weight)[] WeaponNames =
+        {
+        ("Кинжал", 30), ("Меч", 30), ("Топор", 20), ("Копьё", 15), ("Молот", 5)
+    };
+
+        private static readonly (string name, int weight)[] ArmorNames =
+        {
+        ("Кожаная броня", 30), ("Кольчуга", 30), ("Щит", 20), ("Латы", 15), ("Драконья чешуя", 5)
+    };
+
+        public static Rarity RollRarity()
+        {
+            int total = RarityWeights.Sum(x => x.weight);
+            int roll = rnd.Next(total);
+            int acc = 0;
+            foreach (var (rarity, weight) in RarityWeights)
+            {
+                acc += weight;
+                if (roll < acc) return rarity;
+            }
+            return Rarity.Common;
+        }
+
+        private static string RollName((string name, int weight)[] pool)
+        {
+            int total = pool.Sum(x => x.weight);
+            int roll = rnd.Next(total);
+            int acc = 0;
+            foreach (var (name, weight) in pool)
+            {
+                acc += weight;
+                if (roll < acc) return name;
+            }
+            return pool[0].name;
+        }
+
+        private static double RarityMultiplier(Rarity r) => r switch
+        {
+            Rarity.Common => 1.0,
+            Rarity.Uncommon => 1.3,
+            Rarity.Rare => 1.7,
+            Rarity.Epic => 2.2,
+            Rarity.Legendary => 3.0,
+            _ => 1.0
+        };
 
         public static Item CreateRandomItem()
         {
             int type = rnd.Next(3);
-            switch (type)
+
+            if (type == 0)
+                return new Item("Лечебное зелье", ItemType.Potion, Rarity.Common);
+
+            Rarity rarity = RollRarity();
+            double mult = RarityMultiplier(rarity);
+
+            if (type == 1)
             {
-                case 0:
-                    return new Item("Лечебное зелье", ItemType.Potion);
-                case 1:
-                    return new Item("Меч", ItemType.Weapon, attackBonus: rnd.Next(2, 6));
-                default:
-                    return new Item("Щит", ItemType.Armor, defenseBonus: rnd.Next(1, 4));
+                string name = RollName(WeaponNames);
+                int bonus = (int)Math.Round(rnd.Next(2, 6) * mult);
+                return new Item(name, ItemType.Weapon, rarity, attackBonus: bonus);
+            }
+            else
+            {
+                string name = RollName(ArmorNames);
+                int bonus = (int)Math.Round(rnd.Next(1, 4) * mult);
+                return new Item(name, ItemType.Armor, rarity, defenseBonus: bonus);
             }
         }
     }
@@ -322,10 +425,20 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
             Console.WriteLine("========================================");
         }
 
+        static void PrintItemColored(Item item)
+        {
+            ConsoleColor old = Console.ForegroundColor;
+            Console.ForegroundColor = Item.RarityColor(item.Rarity);
+            Console.Write(item.ToString());
+            Console.ForegroundColor = old;
+        }
+
         private void OpenChest()
         {
             Item item = ItemFactory.CreateRandomItem();
-            Console.WriteLine($"В сундуке: {item}");
+            Console.Write("В сундуке: ");
+            PrintItemColored(item);
+            Console.WriteLine();
 
             if (item.Type == ItemType.Potion)
             {
