@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+using System.Text.Json;
+
 
 namespace ISIP224_Pokusaeva_Shalaevskiy
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             try
             {
@@ -36,7 +39,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
     {
         public string Name { get; protected set; }
         public int MaxHealth { get; protected set; }
-        public int Health { get; protected set; }
+        public int Health { get; set; }
         public bool IsAlive => Health > 0;
 
         public Entity(string name, int maxHealth)
@@ -382,7 +385,23 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
 
         public Game()
         {
-            Console.WriteLine("=== Добро пожаловать в текстовый рогалик! ===");
+            Console.WriteLine("=== Добро пожаловать в Sharaga Fight! ===");
+            if (SaveManager.SaveExists())
+            {
+                Console.Write("Найдено сохранение. Загрузить? (y/n): ");
+                string c = Console.ReadLine()?.Trim().ToLower();
+                if (c == "y" || c == "д")
+                {
+                    var loaded = SaveManager.Load();
+                    if (loaded.HasValue)
+                    {
+                        player = loaded.Value.player;
+                        turnCounter = loaded.Value.turnCounter;
+                        Console.WriteLine($"Игра загружена. Ход: {turnCounter}");
+                        return;
+                    }
+                }
+            }
             Console.Write("Введите имя вашего героя: ");
             string name = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(name)) name = "Герой";
@@ -393,6 +412,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
         {
             while (player.IsAlive)
             {
+                Console.Clear();
                 turnCounter++;
                 Console.WriteLine($"\n========== Ход {turnCounter} ==========");
                 player.ShowStats();
@@ -420,8 +440,21 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
 
                 if (!player.IsAlive) break;
 
-                Console.WriteLine("\nНажмите Enter для продолжения...");
-                Console.ReadLine();
+                Console.WriteLine("\nКоманды: [Enter] продолжить, [s] сохранить, [q] выйти");
+                string cmd = Console.ReadLine()?.Trim().ToLower();
+
+                if (cmd == "s" || cmd == "ы")
+                {
+                    SaveManager.Save(player, turnCounter);
+                    continue;
+                }
+                if (cmd == "q" || cmd == "й")
+                {
+                    Console.WriteLine("Сохранить перед выходом? (y/n): ");
+                    string sc = Console.ReadLine()?.Trim().ToLower();
+                    if (sc == "y" || sc == "д") SaveManager.Save(player, turnCounter);
+                    return;
+                }
             }
 
             Console.WriteLine("\n========================================");
@@ -455,12 +488,16 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
             if (item.Type == ItemType.Weapon)
             {
                 Console.WriteLine($"Текущее оружие: {(player.Weapon != null ? player.Weapon.ToString() : "нет")}");
-                Console.WriteLine($"Новое оружие: {item}");
+                Console.Write($"Новое оружие: ");
+                PrintItemColored(item);
+                Console.WriteLine();
             }
             else
             {
                 Console.WriteLine($"Текущий доспех: {(player.Armor != null ? player.Armor.ToString() : "нет")}");
-                Console.WriteLine($"Новый доспех: {item}");
+                Console.Write($"Новый доспех: ");
+                PrintItemColored(item);
+                Console.WriteLine();
             }
 
             Console.Write("Взять новый предмет? (y/n): ");
@@ -584,5 +621,96 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
             player.TakeDamage(damage);
             Console.WriteLine($"{enemy.Name} наносит {damage} урона!");
         }
+    }
+
+    class SaveData
+    {
+        public string PlayerName { get; set; }
+        public int Health { get; set; }
+        public int MaxHealth { get; set; }
+        public int BaseAttack { get; set; }
+        public int BaseDefense { get; set; }
+        public ItemDto Weapon { get; set; }
+        public ItemDto Armor { get; set; }
+        public int TurnCounter { get; set; }
+    }
+
+    class ItemDto
+    {
+        public string Name { get; set; }
+        public ItemType Type { get; set; }
+        public Rarity Rarity { get; set; }
+        public int AttackBonus { get; set; }
+        public int DefenseBonus { get; set; }
+    }
+
+static class SaveManager
+    {
+        private const string SavePath = "save.json";
+
+        public static void Save(Player player, int turnCounter)
+        {
+            var data = new SaveData
+            {
+                PlayerName = player.Name,
+                Health = player.Health,
+                MaxHealth = player.MaxHealth,
+                BaseAttack = player.BaseAttack,
+                BaseDefense = player.BaseDefense,
+                Weapon = ToDto(player.Weapon),
+                Armor = ToDto(player.Armor),
+                TurnCounter = turnCounter
+            };
+
+            string json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(SavePath, json);
+            Console.WriteLine($"Игра сохранена в файл {SavePath}");
+        }
+
+        public static (Player player, int turnCounter)? Load()
+        {
+            if (!File.Exists(SavePath))
+            {
+                Console.WriteLine("Файл сохранения не найден.");
+                return null;
+            }
+
+            try
+            {
+                string json = File.ReadAllText(SavePath);
+                var data = JsonSerializer.Deserialize<SaveData>(json);
+                if (data == null) return null;
+
+                var player = new Player(data.PlayerName, data.MaxHealth)
+                {
+                    Health = data.Health,
+                    BaseAttack = data.BaseAttack,
+                    BaseDefense = data.BaseDefense,
+                    Weapon = FromDto(data.Weapon),
+                    Armor = FromDto(data.Armor)
+                };
+
+                return (player, data.TurnCounter);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка загрузки: {ex.Message}");
+                return null;
+            }
+        }
+
+        public static bool SaveExists() => File.Exists(SavePath);
+
+        private static ItemDto ToDto(Item item) => item == null ? null : new ItemDto
+        {
+            Name = item.Name,
+            Type = item.Type,
+            Rarity = item.Rarity,
+            AttackBonus = item.AttackBonus,
+            DefenseBonus = item.DefenseBonus
+        };
+
+        private static Item FromDto(ItemDto dto) => dto == null ? null :
+            new Item(dto.Name, dto.Type, dto.Rarity, dto.AttackBonus, dto.DefenseBonus);
     }
 }
