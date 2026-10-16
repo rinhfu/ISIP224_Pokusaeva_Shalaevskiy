@@ -17,7 +17,7 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
     enum EnemyType { Goblin, Skeleton, Mage};
     enum BossTytpe { VVG, Kovalsky, ArchmageCpp, PestovCmm }
     enum ItemType { Potion, Weapon, Armor}
-    enum PlayerAction { Atack, Defend }
+    enum PlayerAction { Attack, Defend }
 
     abstract class Entity
     {
@@ -255,4 +255,205 @@ namespace ISIP224_Pokusaeva_Shalaevskiy
         }
     }
 
+    class Game
+    {
+        private Player player;
+        private Random rnd = new Random();
+        private int turnCounter = 0;
+
+        public Game()
+        {
+            Console.WriteLine("=== Добро пожаловать в текстовый рогалик! ===");
+            Console.Write("Введите имя вашего героя: ");
+            string name = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(name)) name = "Герой";
+            player = new Player(name, 100);
+        }
+
+        public void Run()
+        {
+            while (player.IsAlive)
+            {
+                turnCounter++;
+                Console.WriteLine($"\n========== Ход {turnCounter} ==========");
+                player.ShowStats();
+
+                if (turnCounter % 10 == 0)
+                {
+                    Console.WriteLine("\n!!! ВАС ВСТРЕЧАЕТ БОСС !!!");
+                    Enemy boss = EnemyFactory.CreateRandomBoss();
+                    Fight(boss);
+                }
+                else
+                {
+                    if (rnd.Next(2) == 0)
+                    {
+                        Console.WriteLine("\nВы нашли сундук!");
+                        OpenChest();
+                    }
+                    else
+                    {
+                        Console.WriteLine("\nВас атакует враг!");
+                        Enemy enemy = EnemyFactory.CreateRandomEnemy();
+                        Fight(enemy);
+                    }
+                }
+
+                if (!player.IsAlive) break;
+
+                Console.WriteLine("\nНажмите Enter для продолжения...");
+                Console.ReadLine();
+            }
+
+            Console.WriteLine("\n========================================");
+            Console.WriteLine($"Игра окончена! Вы продержались {turnCounter} ходов.");
+            Console.WriteLine("========================================");
+        }
+
+        private void OpenChest()
+        {
+            Item item = ItemFactory.CreateRandomItem();
+            Console.WriteLine($"В сундуке: {item}");
+
+            if (item.Type == ItemType.Potion)
+            {
+                player.HealFull();
+                Console.WriteLine("Вы выпили зелье и полностью восстановили здоровье!");
+                return;
+            }
+
+            Console.WriteLine("\n--- Сравнение ---");
+            if (item.Type == ItemType.Weapon)
+            {
+                Console.WriteLine($"Текущее оружие: {(player.Weapon != null ? player.Weapon.ToString() : "нет")}");
+                Console.WriteLine($"Новое оружие: {item}");
+            }
+            else
+            {
+                Console.WriteLine($"Текущий доспех: {(player.Armor != null ? player.Armor.ToString() : "нет")}");
+                Console.WriteLine($"Новый доспех: {item}");
+            }
+
+            Console.Write("Взять новый предмет? (y/n): ");
+            string choice = Console.ReadLine()?.Trim().ToLower();
+            if (choice == "y" || choice == "yes" || choice == "д" || choice == "да")
+            {
+                if (item.Type == ItemType.Weapon)
+                    player.Weapon = item;
+                else
+                    player.Armor = item;
+                Console.WriteLine("Вы взяли предмет!");
+            }
+            else
+            {
+                Console.WriteLine("Вы выбросили предмет.");
+            }
+        }
+
+        private void Fight(Enemy enemy)
+        {
+            Console.WriteLine("\n--- НАЧАЛО БОЯ ---");
+            enemy.ShowStats();
+            Console.WriteLine("\n--- Ваши характеристики ---");
+            player.ShowStats();
+
+            while (player.IsAlive && enemy.IsAlive)
+            {
+                if (player.IsFrozen)
+                {
+                    Console.WriteLine("\nВы заморожены и пропускаете ход!");
+                    player.IsFrozen = false;
+                }
+                else
+                {
+                    PlayerTurn(enemy);
+                }
+
+                if (!enemy.IsAlive)
+                {
+                    Console.WriteLine($"\n{enemy.Name} побеждён!");
+                    break;
+                }
+
+                EnemyTurn(enemy);
+
+                if (!player.IsAlive)
+                {
+                    Console.WriteLine("\nВы погибли...");
+                    break;
+                }
+
+                Console.WriteLine($"\nВаше HP: {player.Health}/{player.MaxHealth} | HP врага: {enemy.Health}/{enemy.MaxHealth}");
+            }
+        }
+
+        private void PlayerTurn(Enemy enemy)
+        {
+            Console.WriteLine("\n--- Ваш ход ---");
+            Console.WriteLine("1. Атака");
+            Console.WriteLine("2. Защита");
+            Console.Write("Выбор: ");
+
+            string input = Console.ReadLine()?.Trim();
+            PlayerAction action;
+
+            if (input == "2")
+                action = PlayerAction.Defend;
+            else
+                action = PlayerAction.Attack;
+
+            player.IsDefending = false;
+
+            if (action == PlayerAction.Attack)
+            {
+                int damage = Math.Max(1, player.TotalAttack - enemy.Defense);
+                enemy.TakeDamage(damage);
+                Console.WriteLine($"Вы атакуете и наносите {damage} урона!");
+            }
+            else
+            {
+                if (rnd.NextDouble() < 0.4)
+                {
+                    Console.WriteLine("Вы готовитесь к защите... и полностью уклоняетесь от следующей атаки!");
+                    player.IsDefending = true;
+                }
+                else
+                {
+                    double blockPercent = 0.7 + rnd.NextDouble() * 0.3;
+                    int blockAmount = (int)(player.TotalDefense * blockPercent);
+                    Console.WriteLine($"Вы блокируете! Следующая атака будет ослаблена на {blockAmount} (блок {blockPercent:P0} от защиты {player.TotalDefense}).");
+                    player.BaseDefense += blockAmount;
+                    player.IsDefending = false;
+                    pendingBlock = blockAmount;
+                }
+            }
+        }
+
+        private int pendingBlock = 0;
+
+        private void EnemyTurn(Enemy enemy)
+        {
+            Console.WriteLine($"\n--- Ход {enemy.Name} ---");
+
+            if (player.IsDefending)
+            {
+                Console.WriteLine($"Вы полностью уклонились от атаки {enemy.Name}!");
+                player.IsDefending = false;
+                return;
+            }
+
+            int damage = enemy.CalculateDamage(player);
+
+            if (pendingBlock > 0)
+            {
+                damage = Math.Max(0, damage - pendingBlock);
+                player.BaseDefense -= pendingBlock;
+                pendingBlock = 0;
+                Console.WriteLine($"Блок поглотил часть урона!");
+            }
+
+            player.TakeDamage(damage);
+            Console.WriteLine($"{enemy.Name} наносит {damage} урона!");
+        }
+    }
 }
